@@ -1,0 +1,338 @@
+#!/bin/bash
+
+##
+# MIT License
+#
+# Copyright (c) 2018 Stephan Weintritt
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+##
+
+VERSION=0.2.0
+NAME=$(basename $0)
+ORIGINPATH=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
+PROPERTIES=${ORIGINPATH}/vim-add.properties
+AUTOLOAD_DIR=$HOME/.vim/autoload
+BUNDLE_DIR=$HOME/.vim/bundle
+IGNORES="^#|^$"
+
+# The prefix is added to all log messages to spot them easier
+# between git outputs
+LOG_PREFIX="---"
+
+is_known_plugin() {
+    result=$(egrep -v "${IGNORES}" ${PROPERTIES} | grep "$1" | wc -l)
+
+    if [ $result -gt 0 ]; then
+        echo "true"
+    else
+        echo "false"
+    fi
+}
+
+##
+# adds the given number of spaces to the string
+#
+#   $1 string to be expanded
+#   $2 number of spaces to be appended
+##
+expand_string() {
+    expstring=$1
+    length=$2
+    while [ ${#expstring} -lt $length ]; do
+        expstring="$expstring "
+    done
+    echo "$expstring"
+}
+
+##
+# returns the length of the longest plugin name
+##
+max_length() {
+    length=0
+    while read -r plugin; do
+        name=${plugin##*/}
+        clength=${#name}
+        if [ "$clength" -gt "$length" ]; then
+            length=$clength
+        fi
+    done < <(egrep -v "${IGNORES}" ${PROPERTIES})
+    echo $length
+}
+
+##
+# Install the plugin by cloning the repository into $BUNDLE_DIR
+#
+# $1 name of the plugin
+# $2 url to the git repository
+##
+install_plugin() {
+    if [ ! -d $BUNDLE_DIR ]; then
+        echo "$LOG_PREFIX Pathogen needs to be installed first"
+        install_pathogen
+    fi
+
+    if [ "$(plugin_status $1)" == "installed" ]; then
+        echo "$LOG_PREFIX Plugin $1 is already installed"
+    else
+        echo "$LOG_PREFIX Installing $1"
+
+        if [ "$1" == "vim-pathogen" ]; then
+            install_pathogen
+        else
+            cd $BUNDLE_DIR
+            git clone $2
+            if [ $? -ne 0 ]; then
+                echo "$LOG_PREFIX Error while installing $1"
+            else
+                echo "$LOG_PREFIX Installed $1"
+            fi
+        fi
+    fi
+}
+
+install_pathogen() {
+    if [ ! -d $AUTOLOAD_DIR ]; then
+        echo "$LOG_PREFIX Creating $AUTOLOAD_DIR"
+        mkdir -p $AUTOLOAD_DIR
+    fi
+
+    if [ ! -d $BUNDLE_DIR ]; then
+        echo "$LOG_PREFIX Creating $BUNDLE_DIR"
+        mkdir -p $BUNDLE_DIR
+    fi
+
+    cd $BUNDLE_DIR
+    repo=$(egrep -v "${IGNORES}" ${PROPERTIES} | grep "vim-pathogen")
+    git clone $repo
+
+    if [ $? -eq 0 ]; then
+        echo "$LOG_PREFIX Adding symlink for pathogen"
+        ln -s $BUNDLE_DIR/vim-pathogen/autoload/pathogen.vim $AUTOLOAD_DIR/pathogen.vim
+        echo "$LOG_PREFIX Installed pathogen"
+    else
+        echo "$LOG_PREFIX Error while installing pathogen"
+    fi
+}
+
+##
+# returns the status of the plugin, by checking if a subdirectory in the bundle directory
+# with the name of the plugin exists. for now this is only installed or not installed
+#
+# $1 name of the plugin
+##
+plugin_status() {
+    if [ "$1" == "vim-pathogen" ]; then
+        if [ -f $AUTOLOAD_DIR/pathogen.vim ] && [ $BUNDLE_DIR/vim-pathogen/autoload/pathogen.vim ]; then
+            echo "installed"
+        else
+            echo "not installed"
+        fi
+    else
+        if [ -d ${BUNDLE_DIR}/$1 ]; then
+            echo "installed"
+        else
+            echo "not installed"
+        fi
+    fi
+}
+
+##
+# removes the plugin by deleting its directory from the bundle directory
+#
+# $1 name of the plugin
+##
+remove_plugin() {
+    if [ -d ${BUNDLE_DIR}/$1 ]; then
+        echo "$LOG_PREFIX Removing $1"
+        if [ "$name" == "vim-pathogen" ]; then
+            rm --force $AUTOLOAD_DIR/pathogen.vim
+            echo "$LOG_PREFIX Removed symbolic link in autoload for pathogen"
+        fi
+
+        rm --recursive --force ${BUNDLE_DIR}/$1
+        if [ $? -ne 0 ]; then
+            echo "$LOG_PREFIX Error removing $1"
+        else
+            echo "$LOG_PREFIX Removed $1"
+        fi
+    else
+        echo "$LOG_PREFIX $1 is not installed"
+    fi
+}
+
+##
+# update the plugin by making a pull on the git repository
+#
+# $1 name of the plugin
+##
+update_plugin() {
+    if [ -d ${BUNDLE_DIR}/$1 ]; then
+        echo "$LOG_PREFIX Updating plugin $1"
+        cd ${BUNDLE_DIR}/$1
+        git pull
+        if [ $? -ne 0 ]; then
+            echo "$LOG_PREFIX Error while updating $1"
+        else
+            echo "$LOG_PREFIX Updated $1"
+        fi
+    else
+        echo "$LOG_PREFIX $1 is not installed"
+    fi
+}
+
+cmd_install() {
+    if [ -z $1 ]; then
+        echo "$LOG_PREFIX Provide plugin name or 'all' for all plugins"
+        return
+    fi
+
+    if [ "$1" == "all" ]; then
+        while read -r plugin; do
+            name=${plugin##*/}
+            install_plugin $name $plugin
+        done < <(egrep -v "${IGNORES}" ${PROPERTIES})
+    else
+        if [ "$(is_known_plugin $1)" == "true" ]; then
+            repo=$(egrep -v "${IGNORES}" ${PROPERTIES} | grep $1)
+            install_plugin $1 $repo
+        else
+            echo "$LOG_PREFIX Unknown plugin: $1"
+        fi
+    fi
+}
+
+cmd_status() {
+    if [ -z $1 ]; then
+        length=$(max_length)
+        echo "$LOG_PREFIX Status of plugins:"
+        echo
+        while read -r plugin; do
+            name=${plugin##*/}
+            echo "  $(expand_string $name $length) - $(plugin_status $name)"
+        done < <(egrep -v "${IGNORES}" ${PROPERTIES})
+    else
+        if [ $(is_known_plugin $1) == "true" ]; then
+            echo "$LOG_PREFIX Plugin $1 is $(plugin_status $1)"
+        else
+            echo "$LOG_PREFIX Unknown plugin name: $1"
+        fi
+    fi
+}
+
+cmd_remove() {
+    if [ -z $1 ]; then
+        echo "$LOG_PREFIX Provide plugin name or 'all' for all plugins"
+        return
+    fi
+
+    if [ "$1" == "all" ]; then
+        while read -r plugin; do
+            name=${plugin##*/}
+            remove_plugin $name
+        done < <(egrep -v "${IGNORES}" ${PROPERTIES})
+    else
+        if [ "$(is_known_plugin $1)" == "true" ]; then
+            remove_plugin $1
+        else
+            echo "$LOG_PREFIX Unknown plugin: $1"
+        fi
+    fi
+}
+
+cmd_update() {
+    if [ -z $1 ]; then
+        echo "$LOG_PREFIX Provide plugin name or 'all' for all plugins"
+        return
+    fi
+
+    if [ "$1" == "all" ]; then
+        while read -r plugin; do
+            name=${plugin##*/}
+            update_plugin $name
+        done < <(egrep -v "${IGNORES}" ${PROPERTIES})
+    else
+        if [ "$(is_known_plugin $1)" == "true" ]; then
+            update_plugin $1
+        else
+            echo "$LOG_PREFIX Unknown plugin: $1"
+        fi
+    fi
+}
+
+cmd_usage() {
+    echo
+    echo "$NAME <command>"
+    echo
+    echo "   help"
+    echo "       Prints this usage message"
+    echo
+    echo "   install <name>|all"
+    echo "       Install the plugin given by name, or all."
+    echo
+    echo "   remove <name>|all"
+    echo "       Remove the given plugin, or all."
+    echo
+    echo "   status <plugin>"
+    echo "       Show the status of the given plugins, or all if no name is given."
+    echo "       Possible states are: INSTALLED and NOT-INSTALLED"
+    echo
+    echo "   update <name>|all"
+    echo "       Update the given plugin, or all."
+    echo
+    echo "   version"
+    echo "       Version of this script."
+    echo
+    echo
+}
+
+cmd_version() {
+    echo "$NAME version $VERSION"
+}
+
+if [ -z $1 ]; then
+    echo "$LOG_PREFIX No command given."
+    cmd_usage
+else
+    case "$1" in
+        'help')
+            cmd_usage
+            ;;
+        'install')
+            cmd_install $2
+            ;;
+        'remove')
+            cmd_remove $2
+            ;;
+        'status')
+            cmd_status $2
+            ;;
+        'update')
+            cmd_update $2
+            ;;
+        'version')
+            cmd_version $2
+            ;;
+        *)
+            echo "$LOG_PREFIX Unknown command: $1"
+            cmd_usage
+            ;;
+    esac
+    cd $ORIGINPATH
+fi
