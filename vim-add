@@ -197,6 +197,21 @@ update_plugin() {
     fi
 }
 
+##
+# Add a new plugin url to the configuration
+#
+# $1 url of the plugin
+##
+cmd_add() {
+    if [ "$(is_known_plugin $1)" == "true" ]; then
+        echo "$LOG_PREFIX Plugin $1 is already in the config file"
+    else
+        echo "$1" >> $PROPERTIES
+        name=${1##*/}
+        echo "$LOG_PREFIX Added plugin $name to the config file"
+    fi
+}
+
 cmd_install() {
     if [ -z $1 ]; then
         echo "$LOG_PREFIX Provide plugin name or 'all' for all plugins"
@@ -280,6 +295,9 @@ cmd_usage() {
     echo
     echo "$NAME <command>"
     echo
+    echo "   add <url>"
+    echo "       Add the given URL to the config file."
+    echo
     echo "   help"
     echo "       Prints this usage message"
     echo
@@ -311,6 +329,9 @@ if [ -z $1 ]; then
     cmd_usage
 else
     case "$1" in
+        'add')
+            cmd_add $2
+            ;;
         'help')
             cmd_usage
             ;;
