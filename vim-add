@@ -212,6 +212,27 @@ cmd_add() {
     fi
 }
 
+##
+# Remove the plugin if installed and delete it from the config file
+#
+# $1 name of the plugin
+##
+cmd_delete() {
+    cmd_remove $1
+    while read -r plugin; do
+        name=${plugin##*/}
+        if [ "$name" == "$1" ]; then
+            pattern="/${name}/d"
+            sed -i ${pattern} ${PROPERTIES}
+        fi
+    done < <(egrep -v "${IGNORES}" ${PROPERTIES})
+}
+
+##
+# Install the given plugin or all plugins using install_plugin
+#
+# $1 name of the plugin or 'all' for all plugins
+##
 cmd_install() {
     if [ -z $1 ]; then
         echo "$LOG_PREFIX Provide plugin name or 'all' for all plugins"
@@ -226,6 +247,7 @@ cmd_install() {
     else
         if [ "$(is_known_plugin $1)" == "true" ]; then
             repo=$(egrep -v "${IGNORES}" ${PROPERTIES} | grep $1)
+            # TODO Check if repo is empty
             install_plugin $1 $repo
         else
             echo "$LOG_PREFIX Unknown plugin: $1"
@@ -298,6 +320,9 @@ cmd_usage() {
     echo "   add <url>"
     echo "       Add the given URL to the config file."
     echo
+    echo "   delete <name>"
+    echo "       Remove the given plugin and delete it from the config file"
+    echo
     echo "   help"
     echo "       Prints this usage message"
     echo
@@ -331,6 +356,9 @@ else
     case "$1" in
         'add')
             cmd_add $2
+            ;;
+        'delete')
+            cmd_delete $2
             ;;
         'help')
             cmd_usage
