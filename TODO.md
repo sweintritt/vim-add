@@ -3,6 +3,8 @@ ToDo
 
 * Add command to add new plugins
 * Add command to remove new plugins
+* Check for conflicting names
+* Error when using install pathogen: found and installed as a regular plugin
 * Add a VERSION file
 * Add bash completion
 * Check if an plugin url is valid
