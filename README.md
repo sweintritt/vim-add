@@ -49,29 +49,50 @@ the same path as the script.
 If the script is started without a command it will print a small help page showing the
 available commands.
 
-    $ ./vim-add
-    --- No command given.
+```
+vim-add <command>
 
-    vim-add <command>
+   add <url>
+       Add the given URL to the config file.
 
-       help
-           Prints this usage message.
+   delete <name>
+       Remove the given plugin and delete it from the config file
 
-       install <name>|all
-           Install the plugin given by name, or all.
+   help
+       Prints this usage message
 
-       remove <name>|all
-           Remove the given plugin, or all.
+   install <name>|all
+       Install the plugin given by name, or all.
 
-       status <plugin>
-           Show the status of the given plugins, or all if no name is given.
-           Possible states are: 'installed' and 'not installed'.
+   remove <name>|all
+       Remove the given plugin, or all.
 
-       update <name>|all
-           Update the given plugin, or all.
+   status <plugin>
+       Show the status of the given plugins, or all if no name is given.
+       Possible states are: INSTALLED and NOT-INSTALLED
 
-       version
-           Version of this script.
+   update <name>|all
+       Update the given plugin, or all.
+
+   version
+       Version of this script.
+```
+## Add
+
+Add a new plugin to the configuration file by providing a URL to the git
+repository.
+
+    $ vim-add add https://github.com/vim-airline/vim-airline
+
+The last part of the URL is used as plugin name.
+
+## Delete 
+
+Delete a plugin from the configuration file.
+
+    $ vim-add delete https://github.com/vim-airline/vim-airline
+
+If the plugin is installed it is removed first.
 
 ## Help
 
@@ -156,4 +177,4 @@ This will call `git pull` in all subdirectories of `BUNDLE_DIR`.
 Prints the scripts version.
 
     $ ./vim-add version
-    vim-add version 1.0.0
+    vim-add version 1.1.0
