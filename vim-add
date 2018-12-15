@@ -208,9 +208,8 @@ cmd_delete() {
     while read -r plugin; do
         name=${plugin##*/}
         if [ "$name" == "$1" ]; then
-            pattern='/${name}/d'
-            sed ${pattern} ${PROPERTIES}
-#            echo "name:$name plugiun:$plugin"
+            pattern="/${name}/d"
+            sed -i ${pattern} ${PROPERTIES}
         fi
     done < <(egrep -v "${IGNORES}" ${PROPERTIES})
 }
