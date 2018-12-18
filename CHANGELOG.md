@@ -4,7 +4,7 @@
 
 ### Added
 
-*
+* vim-commentary and vim-surround to the plugin list.
 
 ### Fixed
 
