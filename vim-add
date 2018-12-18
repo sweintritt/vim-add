@@ -37,7 +37,7 @@ IGNORES="^#|^$"
 LOG_PREFIX="---"
 
 is_known_plugin() {
-    result=$(egrep -v "${IGNORES}" ${PROPERTIES} | grep "$1" | wc -l)
+    result=$(egrep -v "${IGNORES}" ${PROPERTIES} | grep "/$1$" | wc -l)
 
     if [ $result -gt 0 ]; then
         echo "true"
@@ -63,7 +63,6 @@ expand_string() {
 
 ##
 # returns the length of the longest plugin name
-##
 max_length() {
     length=0
     while read -r plugin; do
@@ -246,9 +245,10 @@ cmd_install() {
         done < <(egrep -v "${IGNORES}" ${PROPERTIES})
     else
         if [ "$(is_known_plugin $1)" == "true" ]; then
-            repo=$(egrep -v "${IGNORES}" ${PROPERTIES} | grep $1)
+            repo=$(egrep -v "${IGNORES}" ${PROPERTIES} | grep "/$1$")
             # TODO Check if repo is empty
-            install_plugin $1 $repo
+            echo $repo
+            # install_plugin $1 $repo
         else
             echo "$LOG_PREFIX Unknown plugin: $1"
         fi
