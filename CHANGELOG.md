@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2018-12.18
+
 ### Added
 
 * vim-commentary and vim-surround to the plugin list.
