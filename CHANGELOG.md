@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+* `add` checks if the given URL is valid
+
 ## [1.1.1] - 2018-12.18
 
 ### Added

@@ -36,6 +36,12 @@ IGNORES="^#|^$"
 # between git outputs
 LOG_PREFIX="---"
 
+
+##
+# Returns true if the given plugin name is contained in the config file
+#
+# $1 plugin name
+##
 is_known_plugin() {
     result=$(egrep -v "${IGNORES}" ${PROPERTIES} | grep "/$1$" | wc -l)
 
@@ -47,7 +53,7 @@ is_known_plugin() {
 }
 
 ##
-# adds the given number of spaces to the string
+# Adds the given number of spaces to the string
 #
 #   $1 string to be expanded
 #   $2 number of spaces to be appended
@@ -62,7 +68,8 @@ expand_string() {
 }
 
 ##
-# returns the length of the longest plugin name
+# Returns the length of the longest plugin name
+##
 max_length() {
     length=0
     while read -r plugin; do
@@ -106,6 +113,9 @@ install_plugin() {
     fi
 }
 
+##
+# Installing pathogen into bundle dir and creating a symlink to autoload
+##
 install_pathogen() {
     if [ ! -d $AUTOLOAD_DIR ]; then
         echo "$LOG_PREFIX Creating $AUTOLOAD_DIR"
@@ -131,7 +141,7 @@ install_pathogen() {
 }
 
 ##
-# returns the status of the plugin, by checking if a subdirectory in the bundle directory
+# Returns the status of the plugin, by checking if a subdirectory in the bundle directory
 # with the name of the plugin exists. for now this is only installed or not installed
 #
 # $1 name of the plugin
@@ -153,7 +163,7 @@ plugin_status() {
 }
 
 ##
-# removes the plugin by deleting its directory from the bundle directory
+# Removes the plugin by deleting its directory from the bundle directory
 #
 # $1 name of the plugin
 ##
@@ -177,7 +187,7 @@ remove_plugin() {
 }
 
 ##
-# update the plugin by making a pull on the git repository
+# Update the plugin by making a pull on the git repository
 #
 # $1 name of the plugin
 ##
@@ -205,9 +215,13 @@ cmd_add() {
     if [ "$(is_known_plugin $1)" == "true" ]; then
         echo "$LOG_PREFIX Plugin $1 is already in the config file"
     else
-        echo "$1" >> $PROPERTIES
-        name=${1##*/}
-        echo "$LOG_PREFIX Added plugin $name to the config file"
+        if ! wget --spider --quiet $1; then
+           echo "$LOG_PREFIX $1 is not a valid url or is no longer reachable"
+        else
+           echo "$1" >> $PROPERTIES
+           name=${1##*/}
+           echo "$LOG_PREFIX Added plugin $name to the config file"
+        fi
     fi
 }
 
