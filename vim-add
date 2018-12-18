@@ -246,9 +246,8 @@ cmd_install() {
     else
         if [ "$(is_known_plugin $1)" == "true" ]; then
             repo=$(egrep -v "${IGNORES}" ${PROPERTIES} | grep "/$1$")
-            # TODO Check if repo is empty
-            echo $repo
-            # install_plugin $1 $repo
+            # TODO Check if repo a repo was found
+            install_plugin $1 $repo
         else
             echo "$LOG_PREFIX Unknown plugin: $1"
         fi
