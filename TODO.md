@@ -1,7 +1,6 @@
 ToDo
 =====
 
-* Add bash completion
 * Add script for common used functions
 * Add a VERSION file
 * Add "udpate available" to status

@@ -2,9 +2,12 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2018-12.18
+
 ### Added
 
-* `add` checks if the given URL is valid
+* Checks if the given URL is valid
+* Bash completion script
 
 ## [1.1.1] - 2018-12.18
 

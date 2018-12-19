@@ -24,7 +24,7 @@
 # SOFTWARE.
 ##
 
-VERSION=1.1.1
+VERSION=1.2.0
 NAME=$(basename $0)
 ORIGINPATH=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 PROPERTIES=${ORIGINPATH}/vim-add.properties
