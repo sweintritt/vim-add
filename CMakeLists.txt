@@ -44,7 +44,6 @@ endif()
 set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
 # Autogenerate dependency information
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 # Ubtuntu 16.04 and above
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "git (>= 2.7), bash (>= 4.3), wget (>= 1.17)")
 
