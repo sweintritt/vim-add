@@ -20,7 +20,7 @@ Create a Makefile with cmake and build the package
 # Installation
 
 The easiest way is to build the package and install it. So far I only checked the
-installation on Ubuntu 16.04 and 18.04 (64-Bit).
+installation on Ubuntu 16.04, 18.04 and Debian 9 (all 64-Bit).
 
 Or you can just put the script anywhere in your home folder, e.g. `~/bin`. The directory must be in
 `PATH` or an alias must be set, that you can simply call the script. This is
