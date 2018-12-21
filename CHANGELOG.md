@@ -6,6 +6,7 @@
 
 * vim-add now uses a config file in the users home folder, which is created if not
   present and a list of initial plugins is added.
+* Pathogen is no longer contained in the config file, but in the script itself.
 
 ## [1.2.0] - 2018-12.18
 
