@@ -3,10 +3,13 @@
 ORIGINPATH=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 CONFIG=${HOME}/.vim_add
 IGNORES="^#|^$"
-BUNDLE_DIR=$HOME/.vim/bundle
+BUNDLE_DIR=${HOME}/.vim/bundle
 
 # $1 installed
 _vim-add-get-plugins() {
+    if [ ! -f ${CONFIG} ]; then
+        vim-add version &> /dev/null # trigger the creation of the config file
+    fi
     names="all"
 
     while read -r plugin; do

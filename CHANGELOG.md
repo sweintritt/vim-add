@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+* vim-add now uses a config file in the users home folder, which is created if not
+  present and a list of initial plugins is added.
+
 ## [1.2.0] - 2018-12.18
 
 ### Added
