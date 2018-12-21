@@ -168,7 +168,7 @@ plugin_status() {
 remove_plugin() {
     if [ -d ${BUNDLE_DIR}/$1 ]; then
         echo "$LOG_PREFIX Removing $1"
-        if [ "$name" == "vim-pathogen" ]; then
+        if [ "$1" == "vim-pathogen" ]; then
             rm --force $AUTOLOAD_DIR/pathogen.vim
             echo "$LOG_PREFIX Removed symbolic link in autoload for pathogen"
         fi
@@ -258,7 +258,6 @@ cmd_install() {
     else
         if [ "$(is_known_plugin $1)" == "true" ]; then
             repo=$(egrep -v "${IGNORES}" ${CONFIG} | grep "/$1$")
-            # TODO Check if repo a repo was found
             install_plugin $1 $repo
         else
             echo "$LOG_PREFIX Unknown plugin: $1"
@@ -291,6 +290,7 @@ cmd_remove() {
     fi
 
     if [ "$1" == "all" ]; then
+        remove_plugin "vim-pathogen"
         while read -r plugin; do
             name=${plugin##*/}
             remove_plugin $name
@@ -311,6 +311,7 @@ cmd_update() {
     fi
 
     if [ "$1" == "all" ]; then
+        update_plugin "vim-pathogen"
         while read -r plugin; do
             name=${plugin##*/}
             update_plugin $name
