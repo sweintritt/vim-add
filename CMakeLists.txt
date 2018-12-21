@@ -14,7 +14,8 @@ set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT
 # Installation
 include(GNUInstallDirs)
 install(PROGRAMS vim-add DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(PROGRAMS vim-add-completion.bash DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/bash_completion.d)
+# The slash is required, otherwise the script will be installed into /usr/etc/bash_completion.d
+install(PROGRAMS vim-add-completion.bash DESTINATION /${CMAKE_INSTALL_SYSCONFDIR}/bash_completion.d/)
 
 # Packaging
 include(InstallRequiredSystemLibraries)
@@ -31,7 +32,6 @@ set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
 if (NOT CPACK_GENERATOR)
     set(CPACK_GENERATOR "DEB")
 endif()
-
 # Debian
 set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
 # Autogenerate dependency information
