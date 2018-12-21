@@ -27,7 +27,7 @@
 VERSION=1.2.0
 NAME=$(basename $0)
 ORIGINPATH=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
-PROPERTIES=${ORIGINPATH}/vim-add.properties
+CONFIG=${HOME}/.vim_add
 AUTOLOAD_DIR=$HOME/.vim/autoload
 BUNDLE_DIR=$HOME/.vim/bundle
 IGNORES="^#|^$"
@@ -36,14 +36,13 @@ IGNORES="^#|^$"
 # between git outputs
 LOG_PREFIX="---"
 
-
 ##
 # Returns true if the given plugin name is contained in the config file
 #
 # $1 plugin name
 ##
 is_known_plugin() {
-    result=$(egrep -v "${IGNORES}" ${PROPERTIES} | grep "/$1$" | wc -l)
+    result=$(egrep -v "${IGNORES}" ${CONFIG} | grep "/$1$" | wc -l)
 
     if [ $result -gt 0 ]; then
         echo "true"
@@ -78,7 +77,7 @@ max_length() {
         if [ "$clength" -gt "$length" ]; then
             length=$clength
         fi
-    done < <(egrep -v "${IGNORES}" ${PROPERTIES})
+    done < <(egrep -v "${IGNORES}" ${CONFIG})
     echo $length
 }
 
@@ -128,7 +127,7 @@ install_pathogen() {
     fi
 
     cd $BUNDLE_DIR
-    repo=$(egrep -v "${IGNORES}" ${PROPERTIES} | grep "vim-pathogen")
+    repo=$(egrep -v "${IGNORES}" ${CONFIG} | grep "vim-pathogen")
     git clone $repo
 
     if [ $? -eq 0 ]; then
@@ -218,7 +217,7 @@ cmd_add() {
         if ! wget --spider --quiet $1; then
            echo "$LOG_PREFIX $1 is not a valid url or is no longer reachable"
         else
-           echo "$1" >> $PROPERTIES
+           echo "$1" >> $CONFIG
            name=${1##*/}
            echo "$LOG_PREFIX Added plugin $name to the config file"
         fi
@@ -236,9 +235,9 @@ cmd_delete() {
         name=${plugin##*/}
         if [ "$name" == "$1" ]; then
             pattern="/${name}/d"
-            sed -i ${pattern} ${PROPERTIES}
+            sed -i ${pattern} ${CONFIG}
         fi
-    done < <(egrep -v "${IGNORES}" ${PROPERTIES})
+    done < <(egrep -v "${IGNORES}" ${CONFIG})
 }
 
 ##
@@ -256,10 +255,10 @@ cmd_install() {
         while read -r plugin; do
             name=${plugin##*/}
             install_plugin $name $plugin
-        done < <(egrep -v "${IGNORES}" ${PROPERTIES})
+        done < <(egrep -v "${IGNORES}" ${CONFIG})
     else
         if [ "$(is_known_plugin $1)" == "true" ]; then
-            repo=$(egrep -v "${IGNORES}" ${PROPERTIES} | grep "/$1$")
+            repo=$(egrep -v "${IGNORES}" ${CONFIG} | grep "/$1$")
             # TODO Check if repo a repo was found
             install_plugin $1 $repo
         else
@@ -276,7 +275,7 @@ cmd_status() {
         while read -r plugin; do
             name=${plugin##*/}
             echo "  $(expand_string $name $length) - $(plugin_status $name)"
-        done < <(egrep -v "${IGNORES}" ${PROPERTIES})
+        done < <(egrep -v "${IGNORES}" ${CONFIG})
     else
         if [ $(is_known_plugin $1) == "true" ]; then
             echo "$LOG_PREFIX Plugin $1 is $(plugin_status $1)"
@@ -296,7 +295,7 @@ cmd_remove() {
         while read -r plugin; do
             name=${plugin##*/}
             remove_plugin $name
-        done < <(egrep -v "${IGNORES}" ${PROPERTIES})
+        done < <(egrep -v "${IGNORES}" ${CONFIG})
     else
         if [ "$(is_known_plugin $1)" == "true" ]; then
             remove_plugin $1
@@ -316,7 +315,7 @@ cmd_update() {
         while read -r plugin; do
             name=${plugin##*/}
             update_plugin $name
-        done < <(egrep -v "${IGNORES}" ${PROPERTIES})
+        done < <(egrep -v "${IGNORES}" ${CONFIG})
     else
         if [ "$(is_known_plugin $1)" == "true" ]; then
             update_plugin $1
@@ -361,6 +360,37 @@ cmd_usage() {
 cmd_version() {
     echo "$NAME version $VERSION"
 }
+
+# Create the configuration file if not present
+if [ ! -f ${CONFIG} ]; then
+    touch ${CONFIG}
+    cat > ${CONFIG} <<EOL
+# Just add plugins by adding the URL in a new line
+# Lines starting with # are comments
+# Comments behind URLs do not work
+
+# Pathogen is required and must be the first in the list
+https://github.com/tpope/vim-pathogen
+
+# Add your plugins below this line
+https://github.com/davidhalter/jedi-vim
+https://github.com/justmao945/vim-clang
+https://github.com/kien/ctrlp.vim
+https://github.com/fatih/vim-go
+https://github.com/flazz/vim-colorschemes
+https://github.com/powerline/fonts
+https://github.com/scrooloose/nerdtree
+https://github.com/scrooloose/nerdcommenter
+https://github.com/tomasr/molokai
+https://github.com/tpope/vim-commentary
+https://github.com/tpope/vim-fugitive
+https://github.com/tpope/vim-surround
+https://github.com/Valloric/YouCompleteMe
+https://github.com/vim-airline/vim-airline
+https://github.com/vim-airline/vim-airline-themes
+https://github.com/vim-syntastic/syntastic
+EOL
+fi
 
 if [ -z $1 ]; then
     echo "$LOG_PREFIX No command given."

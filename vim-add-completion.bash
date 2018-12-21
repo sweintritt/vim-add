@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ORIGINPATH=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
-PROPERTIES=${ORIGINPATH}/vim-add.properties
+CONFIG=${HOME}/.vim_add
 IGNORES="^#|^$"
 BUNDLE_DIR=$HOME/.vim/bundle
 
@@ -33,7 +33,7 @@ _vim-add-get-plugins() {
                 fi
             fi
         fi
-    done < <(egrep -v "${IGNORES}" ${PROPERTIES})
+    done < <(egrep -v "${IGNORES}" ${CONFIG})
     echo "$names"
 }
 
