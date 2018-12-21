@@ -127,8 +127,7 @@ install_pathogen() {
     fi
 
     cd $BUNDLE_DIR
-    repo=$(egrep -v "${IGNORES}" ${CONFIG} | grep "vim-pathogen")
-    git clone $repo
+    git clone https://github.com/tpope/vim-pathogen
 
     if [ $? -eq 0 ]; then
         echo "$LOG_PREFIX Adding symlink for pathogen"
@@ -368,11 +367,6 @@ if [ ! -f ${CONFIG} ]; then
 # Just add plugins by adding the URL in a new line
 # Lines starting with # are comments
 # Comments behind URLs do not work
-
-# Pathogen is required and must be the first in the list
-https://github.com/tpope/vim-pathogen
-
-# Add your plugins below this line
 https://github.com/davidhalter/jedi-vim
 https://github.com/justmao945/vim-clang
 https://github.com/kien/ctrlp.vim
