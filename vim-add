@@ -88,7 +88,7 @@ max_length() {
 # $2 url to the git repository
 ##
 install_plugin() {
-    if [ ! -d $BUNDLE_DIR ]; then
+    if [ ! -d $BUNDLE_DIR ] || [ ! -d $BUNDLE_DIR/vim-pathogen ]; then
         echo "$LOG_PREFIX Pathogen needs to be installed first"
         install_pathogen
     fi
@@ -102,7 +102,7 @@ install_plugin() {
             install_pathogen
         else
             cd $BUNDLE_DIR
-            git clone $2
+            git clone -q $2
             if [ $? -ne 0 ]; then
                 echo "$LOG_PREFIX Error while installing $1"
             else
