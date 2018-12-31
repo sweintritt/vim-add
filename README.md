@@ -26,7 +26,7 @@ Or you can just put the script anywhere in your home folder, e.g. `~/bin`. The d
 `PATH` or an alias must be set, that you can simply call the script. This is
 required by the bash completion.
 
-Copy the bash completion scrpt into `/ets/bash_completion.d`.
+Copy the bash completion scrpt into `/etc/bash_completion.d`.
 
 # Commands
 
